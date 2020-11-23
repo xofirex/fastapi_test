@@ -1,0 +1,39 @@
+version: "3"
+
+services:
+    rabbitmq1:
+        image: "rabbitmq:3-management"
+        hostname: "rabbitmq1"
+        environment:
+            RABBITMQ_ERLANG_COOKIE: "TEST_VOLUME"
+            RABBITMQ_DEFAULT_USER: "rabbitmq"
+            RABBITMQ_DEFAULT_PASS: "rabbitmq"
+            RABBITMQ_DEFAULT_HOST: "/"
+        ports:
+            - "15672:15672"
+            - "5672:5672"
+        volumes:
+            - rabbit1:/var/lib/rabbitmq
+
+    api:
+        build: .
+        ports:
+            - 80:80
+        volumes:
+            - .:/test_task
+        command: uvicorn server:app --host 0.0.0.0 --port 80
+        depends_on:
+            - rabbitmq1
+
+    customer:
+        build: .
+        volumes:
+            - .:/test_task
+        command: bash -c "sleep 10; python customer.py"
+        depends_on:
+            - rabbitmq1
+            - api
+
+volumes:
+    rabbit1:
+        driver: local

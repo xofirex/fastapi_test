@@ -1,0 +1,6 @@
+.virtualenv
+.env
+.venv
+.envrc
+**/__pycache__
+log
